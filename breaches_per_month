@@ -32,3 +32,11 @@ for i in "${!sortmonth[@]}"; do
     difference=$(( ${sortmonth[i]} - median ))
     abs_difference[$i]=${difference#-}
 done
+
+sortdifference=($(sort -n <<<"${abs_difference[*]}"))
+Num=${#sortdifference[@]}
+if (( Num % 2 == 1 )); then
+    mad=${sortdifference[Num/2]}
+else
+    mad=$(( (sortdifference[Num/2]+sortdifference[Num/2-1])/2 ))
+fi
