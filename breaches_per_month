@@ -1,63 +1,145 @@
 #!/usr/bin/env bash
 # compute the total number of incidents per month for each of the months, and then compute the median and median absolute deviation (MAD) across the 12 months
 
-
-
+# check if there is no argument
 if [[ $# -eq 0 ]]; then
+
+    # print out the error message
     1>&2 echo "Usage: $0 <file name>"
+
+    # exit with error condition
     exit 1
+
+# exit the if statement
 fi
 
+# check if the file is empty or DNE
 if [[ ! -s $1 ]]; then
+
+    # print out the error message
     1>&2 echo "file does not exist or empty:$1"
+
+    # exit with the error condition
     exit 1
+
+# exit the if statement
 fi
 
+# print out the file and assign it into a variable called data
 data=$(cat "$1")
+
+# Calculate the number of breaches per month
+# use for loop to go through every month
 for month in {1..12}; do
+
+    # separate out the month collumn and count for different month apperence
     MONTH[$month]=$(echo "$data" | gawk -F '\t' -v mon="$month" '$6 == mon { count++ } END { print count }')
+
+
+# exit the for loop
 done
 
+# Calculate the median and median absolute deviation
+# chop each line in the file
 IFS=$'\n'
+
+# sort the month with count in order and assign them in the variable called sortmonth
 sortmonth=($(sort -n <<<"${MONTH[*]}"))
+
+# assign the order number for each monh to the variable to Sortmonth
 Sortmonth=${#sortmonth[@]}
+
+# Calculate median for month
+# ckech if the total number for months is odd
 if (( Sortmonth % 2 == 1 )); then
+
+    # calculate for the median
     median=${sortmonth[Sortmonth/2]}
+
+# check if the total number for months is even number
 else
+
+    # find the average as megian of two numbers that close to the median
+    # assign the output to the variable of median
     median=$(( (sortmonth[Sortmonth/2]+sortmonth[Sortmonth/2-1])/2 ))
+#close the if statement
 fi
 
-
+# using for loop to go th
 for i in "${!sortmonth[@]}"; do
+
+    # calculate the difference between the count of month and the median
+    # assign the output to the variable of "difference"
     difference=$(( ${sortmonth[i]} - median ))
+
+    # absolute the value of difference
     abs_difference[$i]=${difference#-}
+
+# exit the for loop
 done
 
+# re-order the number of all the difference from small to large
 sortdifference=($(sort -n <<<"${abs_difference[*]}"))
+
+# assign the serie number of difference to the value of Num
 Num=${#sortdifference[@]}
+
+# check if the difference is odd
 if (( Num % 2 == 1 )); then
+
+    #calculate the middle number
     mad=${sortdifference[Num/2]}
+
+# check if the difference is even
 else
-    mad=$(( (sortdifference[Num/2]+sortdifference[Num/2-1])/2 ))
+
+    # calculate the average of two close number as the median
+     mad=$(( (sortdifference[Num/2]+sortdifference[Num/2-1])/2 ))
+
+# end the if statement
 fi
 
+
+# Print the median and MAD to standard output
 printf "The median is: %.1f\n" $median
 printf "The MAD is: %.1f\n" $mad
 
-
-
+# Print the table of counts and symbol
 echo -e "Month\tCount\tSymbol"
-echo -e "____________________________________"
 
+# using for loop to go through every month
 for month in {1..12}; do
+
+    # get the number of incidents for the current month
     monthcounting=${MONTH[$month]}
+
+    # calculate the deviation from the median for the current month
     Median_mad_diff=$((monthcounting - median))
+
+    # check if the diff is greater than MAD
     if (( Median_mad_diff > mad )); then
+
+
+        # add "++" to the output
         symbol="++"
+
+    # check if the diff is smaller than median - MAD
     elif (( Median_mad_diff < -mad )); then
+
+        # add "--" to the output
         symbol="--"
+
+    # check if the difference is in the range of median +- MAD
     else
+
+        # add nothing to the output
         symbol=""
+
+    # end the if statement
     fi
+
+    # print out the output in the format of mmonth, month counting, and simble
     printf "%s\t%d\t%s\n" "$(date -d "$month/1" '+%b')" "$monthcounting" "$symbol"
+
+# exit the for loop, and done the code
 done
