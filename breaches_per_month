@@ -12,3 +12,10 @@ if [[ ! -s $1 ]]; then
     1>&2 echo "file does not exist or empty:$1"
     exit 1
 fi
+
+data=$(cat "$1")
+for month in {1..12}; do
+    MONTH[$month]=$(echo "$data" | gawk -F '\t' -v mon="$month" '$6 == mon { count++ } END { print count }')
+done
+
+
