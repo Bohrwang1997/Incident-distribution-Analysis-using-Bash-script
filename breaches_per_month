@@ -61,7 +61,7 @@ else
 
     # find the average as megian of two numbers that close to the median
     # assign the output to the variable of median
-    median=$(( (sortmonth[Sortmonth/2]+sortmonth[Sortmonth/2-1])/2 ))
+    median=$(echo "${sortmonth[Sortmonth/2]} ${sortmonth[Sortmonth/2-1]}" | gawk '{print ($1+$2)/2}')
 #close the if statement
 fi
 
@@ -70,7 +70,7 @@ for i in "${!sortmonth[@]}"; do
 
     # calculate the difference between the count of month and the median
     # assign the output to the variable of "difference"
-    difference=$(( ${sortmonth[i]} - median ))
+    difference=$(echo "${sortmonth[i]} ${median}" | gawk '{print $1-$2}')
 
     # absolute the value of difference
     abs_difference[$i]=${difference#-}
@@ -92,22 +92,22 @@ if (( Num % 2 == 1 )); then
 
 # check if the difference is even
 else
-
+    
     # calculate the average of two close number as the median
-     mad=$(( (sortdifference[Num/2]+sortdifference[Num/2-1])/2 ))
+    mad=$(echo "${sortdifference[Num/2]} ${sortdifference[Num/2-1]}" | gawk '{print ($1+$2)/2}')
 
 # end the if statement
 fi
 
 
 # Print the median and MAD to standard output
-printf "The median is: %.1f\n" $median
-printf "The MAD is: %.1f\n" $mad
+printf "The median is: %0.2f\n" $median
+printf "The MAD is: %0.2f\n" $mad
 
 # Print the table of counts and symbol
 echo -e "Month\tCount\tSymbol"
 
-# using for loop to go through every month
+# using for loop to go through each month
 for month in {1..12}; do
 
     # get the number of incidents for the current month
@@ -116,27 +116,8 @@ for month in {1..12}; do
     # calculate the deviation from the median for the current month
     Median_mad_diff=$((monthcounting - median))
 
-    # check if the diff is greater than MAD
-    if (( Median_mad_diff > mad )); then
-
-
-        # add "++" to the output
-        symbol="++"
-
-    # check if the diff is smaller than median - MAD
-    elif (( Median_mad_diff < -mad )); then
-
-        # add "--" to the output
-        symbol="--"
-
-    # check if the difference is in the range of median +- MAD
-    else
-
-        # add nothing to the output
-        symbol=""
-
-    # end the if statement
-    fi
+    # assign the variable symbol with the values "++", "--", or nothing based on the comparison of Median_mad_diff and mad
+    symbol=$(echo "$Median_mad_diff $mad" | gawk '{ if ($1 > $2) { print "++" } else if ($1 < -$2) { print "--" } else { print "" } }')
 
     # print out the output in the format of mmonth, month counting, and simble
     printf "%s\t%d\t%s\n" "$(date -d "$month/1" '+%b')" "$monthcounting" "$symbol"
