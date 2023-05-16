@@ -18,4 +18,11 @@ for month in {1..12}; do
     MONTH[$month]=$(echo "$data" | gawk -F '\t' -v mon="$month" '$6 == mon { count++ } END { print count }')
 done
 
-
+IFS=$'\n'
+sortmonth=($(sort -n <<<"${MONTH[*]}"))
+Sortmonth=${#sortmonth[@]}
+if (( Sortmonth % 2 == 1 )); then
+    median=${sortmonth[Sortmonth/2]}
+else
+    median=$(( (sortmonth[Sortmonth/2]+sortmonth[Sortmonth/2-1])/2 ))
+fi
