@@ -1,0 +1,12 @@
+#!/bin/bash
+# Creating a bash script called preprocess to check the error of the data and create year and month column
+
+if [[ $# -eq 0 ]]; then
+    1>&2 echo "Usage: wrong script format: $0 <file name>"
+    exit 1
+fi
+
+if [[ ! -s $1 ]]; then
+    1>&2 echo "Usage: the file is empty or DNE: $1"
+    exit 1
+fi
