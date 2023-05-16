@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# compute the total number of incidents per month for each of the months, and then compute the median and median absolute deviation (MAD) across the 12 months
+
+
+
+if [[ $# -eq 0 ]]; then
+    1>&2 echo "Usage: $0 <file name>"
+    exit 1
+fi
+
+if [[ ! -s $1 ]]; then
+    1>&2 echo "file does not exist or empty:$1"
+    exit 1
+fi
