@@ -40,3 +40,15 @@ if (( Num % 2 == 1 )); then
 else
     mad=$(( (sortdifference[Num/2]+sortdifference[Num/2-1])/2 ))
 fi
+
+
+    monthcounting=${MONTH[$month]}
+    Median_mad_diff=$((monthcounting - median))
+    if (( Median_mad_diff > mad )); then
+        symbol="++"
+    elif (( Median_mad_diff < -mad )); then
+        symbol="--"
+    else
+        symbol=""
+    fi
+    printf "%s\t%d\t%s\n" "$(date -d "$month/1" '+%b')" "$monthcounting" "$symbol"
