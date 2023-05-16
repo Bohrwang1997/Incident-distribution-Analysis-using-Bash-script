@@ -15,8 +15,10 @@ fi
 echo -e "Name_of_Covered_Entity\tState\tIndividuals_Affected\tDate_of_Breach\tType_of_Breach\tMonth\tYear"
 
 while IFS=$'\t' read Name_of_Covered_Entity State Individuals_Affected Date_of_Breach Type_of_Breach Location; do
-    date=$(echo $Date_of_Breach | gawk -F'-' '{print $1}')
-    Mon=$(echo $new_date | cut -d'/' -f1)
-    Yr=$(echo $new_date | cut -d'/' -f3)
-    echo -e "$Name_of_Covered_Entity\t$State\t$Individuals_Affected\t$Date_of_Breach\t$Type_of_Breach\t$Mon\t$Yr"
+    if [[ $Individuals_Affected =~ ^[0-9]+$ && $Type_of_Breach =~ ^[a-zA-Z/]+ ]]; then
+        date=$(echo $Date_of_Breach | gawk -F'-' '{print $1}')
+        Mon=$(echo $new_date | cut -d'/' -f1)
+        Yr=$(echo $new_date | cut -d'/' -f3)
+        echo -e "$Name_of_Covered_Entity\t$State\t$Individuals_Affected\t$Date_of_Breach\t$Type_of_Breach\t$Mon\t$Yr"
+    fi
 done < $1
