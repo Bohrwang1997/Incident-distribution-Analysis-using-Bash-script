@@ -17,6 +17,11 @@ echo -e "Name_of_Covered_Entity\tState\tIndividuals_Affected\tDate_of_Breach\tTy
 while IFS=$'\t' read Name_of_Covered_Entity State Individuals_Affected Date_of_Breach Type_of_Breach Location; do
     if [[ $Individuals_Affected =~ ^[0-9]+$ && $Type_of_Breach =~ ^[a-zA-Z/]+ ]]; then
         date=$(echo $Date_of_Breach | gawk -F'-' '{print $1}')
+        if [[ $date =~ ^[0-9]{1,2}/[0-9]{1,2}/[0-9]{1,2}$ ]]; then
+            new_date=$(echo $date | sed -E 's|^([0-9]{1,2})/([0-9]{1,2})/([0-9]{1,2})$|\1/\2/20\3/|')
+        else
+            new_date=$date
+        fi
         Mon=$(echo $new_date | cut -d'/' -f1)
         Yr=$(echo $new_date | cut -d'/' -f3)
         echo -e "$Name_of_Covered_Entity\t$State\t$Individuals_Affected\t$Date_of_Breach\t$Type_of_Breach\t$Mon\t$Yr"
