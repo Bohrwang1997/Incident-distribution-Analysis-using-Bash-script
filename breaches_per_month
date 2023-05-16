@@ -26,3 +26,9 @@ if (( Sortmonth % 2 == 1 )); then
 else
     median=$(( (sortmonth[Sortmonth/2]+sortmonth[Sortmonth/2-1])/2 ))
 fi
+
+
+for i in "${!sortmonth[@]}"; do
+    difference=$(( ${sortmonth[i]} - median ))
+    abs_difference[$i]=${difference#-}
+done
