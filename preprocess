@@ -1,29 +1,64 @@
 #!/bin/bash
-# Creating a bash script called preprocess to check the error of the data and create year and month column
+# Creating a bash script called preprocess to check the error of the data and create year and month column# Creating a bash script called preprocess to check the error of the data and create year and month column
 
+# Using if statement to check whether the file is included
 if [[ $# -eq 0 ]]; then
+    # Print out the error message
     1>&2 echo "Usage: wrong script format: $0 <file name>"
+    # Exit with the error condition
     exit 1
+
+# end of the if statement
 fi
 
+# Using if statement to check whether the file is empty or ordinary
 if [[ ! -s $1 ]]; then
+    # Print out the error message
     1>&2 echo "Usage: the file is empty or DNE: $1"
+    # Exit with the error message
     exit 1
+
+# end of the if statement 
 fi
 
-
+# Print out the heading
 echo -e "Name_of_Covered_Entity\tState\tIndividuals_Affected\tDate_of_Breach\tType_of_Breach\tMonth\tYear"
 
+# Read the file and set each column in the variable of "name state affected Date type location"
 while IFS=$'\t' read Name_of_Covered_Entity State Individuals_Affected Date_of_Breach Type_of_Breach Location; do
+    # Check if cells in the column of Individuals_Affected and Type_of_Breach are not empty or form-error
     if [[ $Individuals_Affected =~ ^[0-9]+$ && $Type_of_Breach =~ ^[a-zA-Z/]+ ]]; then
+        # Select the first date in the form of m/d/y - m/d/y
         date=$(echo $Date_of_Breach | gawk -F'-' '{print $1}')
+
+        # Check if the date is in the form of year/m/d
         if [[ $date =~ ^[0-9]{1,2}/[0-9]{1,2}/[0-9]{1,2}$ ]]; then
+            # Change the date form into m/d/y
             new_date=$(echo $date | sed -E 's|^([0-9]{1,2})/([0-9]{1,2})/([0-9]{1,2})$|\1/\2/20\3/|')
+        
+        # check if the year in the date is in four digits
         else
+
+            # Keep the date form
             new_date=$date
+        
+        # end the if statement 
         fi
+
+        # Select month from the date and set the variable called "month"
         Mon=$(echo $new_date | cut -d'/' -f1)
+
+        # Select year from the date and set the variable called "year"
         Yr=$(echo $new_date | cut -d'/' -f3)
+
+        # Remove everything after the first comma or slash in Type_of_Breach
+        Type_of_Breach=$(echo $Type_of_Breach | sed -E 's/,.*|\/.*//')
+
+        # Expand the table with the month and year and print out the output
         echo -e "$Name_of_Covered_Entity\t$State\t$Individuals_Affected\t$Date_of_Breach\t$Type_of_Breach\t$Mon\t$Yr"
+    
+    # end the if statement
     fi
+
+# finish the for loop and do the precess in the input of $1 
 done < $1
