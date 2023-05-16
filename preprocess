@@ -18,4 +18,5 @@ while IFS=$'\t' read Name_of_Covered_Entity State Individuals_Affected Date_of_B
     date=$(echo $Date_of_Breach | gawk -F'-' '{print $1}')
     Mon=$(echo $new_date | cut -d'/' -f1)
     Yr=$(echo $new_date | cut -d'/' -f3)
+    echo -e "$Name_of_Covered_Entity\t$State\t$Individuals_Affected\t$Date_of_Breach\t$Type_of_Breach\t$Mon\t$Yr"
 done < $1
