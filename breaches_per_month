@@ -41,7 +41,15 @@ else
     mad=$(( (sortdifference[Num/2]+sortdifference[Num/2-1])/2 ))
 fi
 
+printf "The median is: %.1f\n" $median
+printf "The MAD is: %.1f\n" $mad
 
+
+
+echo -e "Month\tCount\tSymbol"
+echo -e "____________________________________"
+
+for month in {1..12}; do
     monthcounting=${MONTH[$month]}
     Median_mad_diff=$((monthcounting - median))
     if (( Median_mad_diff > mad )); then
@@ -52,3 +60,4 @@ fi
         symbol=""
     fi
     printf "%s\t%d\t%s\n" "$(date -d "$month/1" '+%b')" "$monthcounting" "$symbol"
+done
