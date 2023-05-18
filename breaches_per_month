@@ -5,39 +5,27 @@
 
 # check if there is no argument
 if [[ $# -eq 0 ]]; then
-    # print out the error message
     1>&2 echo "Usage: $0 <file name>"
-
-    # exit with error condition
     exit 1
-
 fi
 
 # check if the file is empty or DNE
 if [[ ! -s $1 ]]; then
-
-    # print out the error message
     1>&2 echo "file does not exist or empty:$1"
-
-    # exit with the error condition
     exit 1
-
 fi
 
 # print out the file and assign it into a variable called data
 data=$(cat "$1")
 
 # Calculate the number of breaches per month
-# use for loop to go through every month
 for month in {1..12}; do
 
     # separate out the month collumn and count for different month apperence
     MONTH[$month]=$(echo "$data" | gawk -F '\t' -v mon="$month" '$6 == mon { count++ } END { print count }')
-
 done
 
 # Calculate the median and median absolute deviation
-# chop each line in the file
 IFS=$'\n'
 
 # sort the month with count in order and assign them in the variable called sortmonth
@@ -46,30 +34,23 @@ sortmonth=($(sort -n <<<"${MONTH[*]}"))
 # assign the order number for each monh to the variable to Sortmonth
 Sortmonth=${#sortmonth[@]}
 
-# Calculate median for month
-# ckech if the total number for months is odd
 if (( Sortmonth % 2 == 1 )); then
 
-    # calculate for the median
+    # calculate for the median if the total number is odd
     median=${sortmonth[Sortmonth/2]}
-
 else
-
     # find the average as megian of two numbers that close to the median
-    # assign the output to the variable of median
     median=$(echo "${sortmonth[Sortmonth/2]} ${sortmonth[Sortmonth/2-1]}" | gawk '{print ($1+$2)/2}')
 fi
 
-# using for loop to go through each month count number
+# go through each month count number
 for i in "${!sortmonth[@]}"; do
 
     # calculate the difference between the count of month and the median
-    # assign the output to the variable of "difference"
     difference=$(echo "${sortmonth[i]} ${median}" | gawk '{print $1-$2}')
 
     # absolute the value of difference
     abs_difference[$i]=${difference#-}
-
 done
 
 # re-order the number of all the difference from small to large
@@ -78,28 +59,21 @@ sortdifference=($(sort -n <<<"${abs_difference[*]}"))
 # assign the serie number of difference to the value of Num
 Num=${#sortdifference[@]}
 
-# check if the difference is odd
 if (( Num % 2 == 1 )); then
-
-    #calculate the middle number
+    #calculate the middle number if the different is odd
     mad=${sortdifference[Num/2]}
-
-# check if the difference is even
 else
-    
-    # calculate the average of two close number as the median
+    # calculate the average of two close number as the median if the number is even
     mad=$(echo "${sortdifference[Num/2]} ${sortdifference[Num/2-1]}" | gawk '{print ($1+$2)/2}')
 
-
 fi
-
 
 # Print the median and MAD to standard output
 echo -e "The median is: $median"
 echo -e "The MAD is: $mad"
 
 # Print the table of counts and symbol
-echo -e "Month\tCount\tSymbol"
+echo -e "Month\tCount"
 
 # using for loop to go through each month
 for month in {1..12}; do
@@ -110,10 +84,9 @@ for month in {1..12}; do
     # calculate the deviation from the median for the current month
     Median_mad_diff=$( echo "${monthcounting} ${median}" | gawk '{print $1-$2}')
 
-    # assign the variable symbol with the values "++", "--", or nothing based on the comparison of Median_mad_diff and mad
+    # comparison of Median_mad_diff and mad
     symbol=$(echo "$Median_mad_diff $mad" | gawk '{ if ($1 > $2) { print "++" } else if ($1 < -$2) { print "--" } else { print "" } }')
 
     # print out the output in the format of mmonth, month counting, and simble
     printf "%s\t%d\t%s\n" "$(date -d "$month/1" '+%b')" "$monthcounting" "$symbol"
-
 done
