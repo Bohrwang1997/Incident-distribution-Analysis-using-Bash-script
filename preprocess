@@ -1,62 +1,53 @@
 #!/bin/bash
-# Creating a bash script called preprocess to check the error of the data and create year and month column# Creating a bash script called preprocess to check the error of the data and create year and month column
-# Name: Yiren Wang (Bohr)
+# Script: preprocess
+# Description: Performs data preprocessing tasks, checks data errors, and adds year and month columns.
+# Author: Yiren Wang (Bohr)
 # UWA ID: 23794201
 
-
-# Using if statement to check whether the file is included
+# Check if the file argument is provided
 if [[ $# -eq 0 ]]; then
-    # Print out the error message
-    1>&2 echo "Usage: wrong script format: $0 <file name>"
-    # Exit with the error condition
+    # Print an error message if no file argument is provided
+    1>&2 echo "Usage: incorrect script format: $0 <file name>"
     exit 1
-
-
 fi
 
-# Using if statement to check whether the file is empty or ordinary
+# Check if the file exists and is not empty
 if [[ ! -s $1 ]]; then
-    # Print out the error message
-    1>&2 echo "Usage: the file is empty or DNE: $1"
-    # Exit with the error message
+    # Print an error message if the file is empty or does not exist
+    1>&2 echo "Usage: the file is empty or does not exist: $1"
     exit 1
-
 fi
 
-# Print out the heading
+# Print the header
 echo -e "Name_of_Covered_Entity\tState\tIndividuals_Affected\tDate_of_Breach\tType_of_Breach\tMonth\tYear"
 
-# Read the file and set each column in the variable of "name state affected Date type location"
+# Read the file and assign column values to variables
 while IFS=$'\t' read Name_of_Covered_Entity State Individuals_Affected Date_of_Breach Type_of_Breach Location; do
-    # Check if cells in the column of Individuals_Affected and Type_of_Breach are not empty or form-error
+    # Check if the Individuals_Affected and Type_of_Breach columns are not empty and have the expected format
     if [[ $Individuals_Affected =~ ^[0-9]+$ && $Type_of_Breach =~ ^[a-zA-Z/]+ ]]; then
         # Select the first date in the form of m/d/y - m/d/y
         date=$(echo $Date_of_Breach | gawk -F'-' '{print $1}')
 
-        # Check if the date is in the form of year/m/d
+        # Check if the date is in the form of m/d/y
         if [[ $date =~ ^[0-9]{1,2}/[0-9]{1,2}/[0-9]{1,2}$ ]]; then
-            # Change the date form into m/d/y
+            # Change the date format to m/d/yyyy
             new_date=$(echo $date | sed -E 's|^([0-9]{1,2})/([0-9]{1,2})/([0-9]{1,2})$|\1/\2/20\3/|')
-        
-        # check if the year in the date is in four digits
         else
-
-            # Keep the date form
+            # Keep the date format as is
             new_date=$date
-        
- 
         fi
 
-        # Select month from the date and set the variable called "month"
+        # Extract the month from the date
         Mon=$(echo $new_date | cut -d'/' -f1)
 
-        # Select year from the date and set the variable called "year"
+        # Extract the year from the date
         Yr=$(echo $new_date | cut -d'/' -f3)
 
-        # Remove everything after the first comma or slash in Type_of_Breach
+        # Remove everything after the first comma or slash in the Type_of_Breach column
         Type_of_Breach=$(echo $Type_of_Breach | sed -E 's/,.*|\/.*//')
 
-        # Expand the table with the month and year and print out the output
+        # Expand the table with the month and year columns and print the output
         echo -e "$Name_of_Covered_Entity\t$State\t$Individuals_Affected\t$Date_of_Breach\t$Type_of_Breach\t$Mon\t$Yr"
     fi
 done < $1
+
